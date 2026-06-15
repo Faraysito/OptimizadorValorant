@@ -1,0 +1,509 @@
+﻿<Window x:Class="OptimizadorValorant.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Optimizador Valorant" Height="660" Width="940"
+        WindowStartupLocation="CenterScreen" Background="#0B0E13"
+        WindowStyle="None" ResizeMode="CanResize">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="46" ResizeBorderThickness="6" CornerRadius="0" GlassFrameThickness="0"/>
+    </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+
+        <!-- ===== Paleta Valorant ===== -->
+        <Color x:Key="ValRedC">#FF4655</Color>
+        <SolidColorBrush x:Key="ValRed" Color="#FF4655"/>
+        <SolidColorBrush x:Key="ValRedDark" Color="#BD3944"/>
+        <SolidColorBrush x:Key="ValMint" Color="#1FB89B"/>
+        <SolidColorBrush x:Key="BgDeep" Color="#0B0E13"/>
+        <SolidColorBrush x:Key="BgPanel" Color="#11151C"/>
+        <SolidColorBrush x:Key="BgCard" Color="#161B24"/>
+        <SolidColorBrush x:Key="BgCardHover" Color="#1E2530"/>
+        <SolidColorBrush x:Key="TextMain" Color="#ECE8E1"/>
+        <SolidColorBrush x:Key="TextDim" Color="#7E8794"/>
+        <SolidColorBrush x:Key="LineSoft" Color="#222A35"/>
+
+        <FontFamily x:Key="Tac">Bahnschrift, Segoe UI Semibold, Segoe UI</FontFamily>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource Tac}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
+        </Style>
+
+        <!-- ===== Botón táctico: esquina cortada + sweep al hover + flash al click ===== -->
+        <Style x:Key="ValButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
+            <Setter Property="FontFamily" Value="{StaticResource Tac}"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="0,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <!-- Forma con esquina inferior-izquierda cortada (chaflan HUD) -->
+                            <Path x:Name="bg" Stretch="Fill" Fill="{StaticResource BgCard}"
+                                  Data="M 8,0 L 1000,0 L 1000,100 L 0,100 L 0,8 Z"/>
+                            <!-- Barra lateral de acento (como icono de habilidad) -->
+                            <Rectangle x:Name="accent" Width="3" HorizontalAlignment="Left" Fill="{StaticResource ValRed}" Opacity="0"/>
+                            <!-- Sweep: franja que cruza al pasar el mouse -->
+                            <Border x:Name="sweep" Background="#22FF4655" Width="60" HorizontalAlignment="Left"
+                                    RenderTransformOrigin="0,0" Opacity="0">
+                                <Border.RenderTransform>
+                                    <TranslateTransform x:Name="sweepT" X="-80"/>
+                                </Border.RenderTransform>
+                            </Border>
+                            <!-- Flash blanco al click -->
+                            <Path x:Name="flash" Stretch="Fill" Fill="White" Opacity="0"
+                                  Data="M 8,0 L 1000,0 L 1000,100 L 0,100 L 0,8 Z"/>
+                            <ContentPresenter x:Name="cp" VerticalAlignment="Center" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="16,0,12,0"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <EventTrigger RoutedEvent="MouseEnter">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="sweep" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.05"/>
+                                        <DoubleAnimation Storyboard.TargetName="sweepT" Storyboard.TargetProperty="X" From="-80" To="1000" Duration="0:0:0.45" DecelerationRatio="0.7"/>
+                                        <DoubleAnimation Storyboard.TargetName="accent" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12"/>
+                                        <ColorAnimation Storyboard.TargetName="bg" Storyboard.TargetProperty="Fill.Color" To="#1E2530" Duration="0:0:0.15"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="MouseLeave">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="sweep" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                                        <DoubleAnimation Storyboard.TargetName="accent" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                                        <ColorAnimation Storyboard.TargetName="bg" Storyboard.TargetProperty="Fill.Color" To="#161B24" Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="Click">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="flash" Storyboard.TargetProperty="Opacity" From="0.55" To="0" Duration="0:0:0.3"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Botón rojo (acción principal) -->
+        <Style x:Key="ValRedButton" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="{StaticResource Tac}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Margin" Value="0,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Path x:Name="bg" Stretch="Fill" Fill="{StaticResource ValRed}"
+                                  Data="M 10,0 L 1000,0 L 1000,100 L 0,100 L 0,10 Z"/>
+                            <Border x:Name="sweep" Background="#55FFFFFF" Width="50" HorizontalAlignment="Left" Opacity="0">
+                                <Border.RenderTransform>
+                                    <TranslateTransform x:Name="sweepT" X="-60"/>
+                                </Border.RenderTransform>
+                            </Border>
+                            <Path x:Name="flash" Stretch="Fill" Fill="White" Opacity="0"
+                                  Data="M 10,0 L 1000,0 L 1000,100 L 0,100 L 0,10 Z"/>
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <EventTrigger RoutedEvent="MouseEnter">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="sweep" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.05"/>
+                                        <DoubleAnimation Storyboard.TargetName="sweepT" Storyboard.TargetProperty="X" From="-60" To="1000" Duration="0:0:0.4" DecelerationRatio="0.6"/>
+                                        <ColorAnimation Storyboard.TargetName="bg" Storyboard.TargetProperty="Fill.Color" To="#FF5E6B" Duration="0:0:0.15"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="MouseLeave">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="sweep" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                                        <ColorAnimation Storyboard.TargetName="bg" Storyboard.TargetProperty="Fill.Color" To="#FF4655" Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="Click">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="flash" Storyboard.TargetProperty="Opacity" From="0.7" To="0" Duration="0:0:0.3"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MiniButton" TargetType="Button" BasedOn="{StaticResource ValButton}">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <!-- Item sidebar -->
+        <Style x:Key="NavButton" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="{StaticResource TextDim}"/>
+            <Setter Property="FontFamily" Value="{StaticResource Tac}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Grid Height="42">
+                            <Rectangle x:Name="bar" Width="3" HorizontalAlignment="Left" Fill="{StaticResource ValRed}" Opacity="0"/>
+                            <Border x:Name="b" Background="Transparent" Margin="0"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="18,0,0,0">
+                                <TextBlock x:Name="ic" Text="{TemplateBinding Tag}" FontSize="15" Width="26" Foreground="{StaticResource TextDim}"/>
+                                <ContentPresenter VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="b" Property="Background" Value="#141922"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="b" Property="Background" Value="#161B24"/>
+                                <Setter TargetName="bar" Property="Opacity" Value="1"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter TargetName="ic" Property="Foreground" Value="{StaticResource ValRed}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Botones barra de titulo -->
+        <Style x:Key="TitleBtn" TargetType="Button">
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="46"/>
+            <Setter Property="Foreground" Value="{StaticResource TextDim}"/>
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="b" Background="Transparent">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="b" Property="Background" Value="#1E2530"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CloseBtn" TargetType="Button" BasedOn="{StaticResource TitleBtn}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="b" Background="Transparent">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="b" Property="Background" Value="{StaticResource ValRed}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
+            <Setter Property="Background" Value="#0E1219"/>
+            <Setter Property="BorderBrush" Value="{StaticResource LineSoft}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontFamily" Value="{StaticResource Tac}"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#B7BCC6"/>
+            <Setter Property="FontFamily" Value="{StaticResource Tac}"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <Style x:Key="CardTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Margin" Value="0,0,0,2"/>
+        </Style>
+    </Window.Resources>
+
+    <!-- Borde rojo fino alrededor de toda la ventana (estilo HUD) -->
+    <Border BorderBrush="{StaticResource ValRed}" BorderThickness="1" Background="{StaticResource BgDeep}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="46"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- ====== BARRA DE TITULO ====== -->
+            <Grid Grid.Row="0" Background="#0A0D12">
+                <Rectangle Height="2" VerticalAlignment="Bottom" Fill="{StaticResource ValRed}" Opacity="0.5"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                    <!-- Triangulo rojo estilo logo Valorant -->
+                    <Path Fill="{StaticResource ValRed}" Data="M 0,16 L 7,0 L 14,16 L 9,16 L 7,11 L 5,16 Z" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="OPTIMIZADOR" FontSize="13" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                    <TextBlock Text="VALORANT" FontSize="13" FontWeight="Bold" Foreground="{StaticResource ValRed}" VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button Content="&#xE921;" Click="Min_Click" Style="{StaticResource TitleBtn}"/>
+                    <Button Content="&#xE922;" Click="Max_Click" Style="{StaticResource TitleBtn}"/>
+                    <Button Content="&#xE8BB;" Click="Close_Click" Style="{StaticResource CloseBtn}"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- ====== CUERPO ====== -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="210"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- SIDEBAR -->
+                <Border Grid.Column="0" Background="#0A0D12">
+                    <Grid>
+                        <Rectangle Width="1" HorizontalAlignment="Right" Fill="{StaticResource LineSoft}"/>
+                        <StackPanel Margin="0,18,0,0">
+                            <TextBlock Text="MENU" FontSize="10" Foreground="{StaticResource TextDim}" Margin="20,0,0,12" FontWeight="Bold"/>
+                            <RadioButton x:Name="navInicio" Style="{StaticResource NavButton}" Tag="◆" Content="INICIO" IsChecked="True" Checked="Nav_Checked"/>
+                            <RadioButton x:Name="navGraficos" Style="{StaticResource NavButton}" Tag="▤" Content="GRAFICOS" Checked="Nav_Checked"/>
+                            <RadioButton x:Name="navSistema" Style="{StaticResource NavButton}" Tag="⚙" Content="SISTEMA" Checked="Nav_Checked"/>
+                            <RadioButton x:Name="navMonitoreo" Style="{StaticResource NavButton}" Tag="◷" Content="MONITOREO" Checked="Nav_Checked"/>
+                            <RadioButton x:Name="navPerfiles" Style="{StaticResource NavButton}" Tag="❏" Content="PERFILES" Checked="Nav_Checked"/>
+                        </StackPanel>
+                        <TextBlock Text="v1.0" FontSize="10" Foreground="{StaticResource TextDim}" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="20,0,0,16"/>
+                    </Grid>
+                </Border>
+
+                <!-- CONTENIDO -->
+                <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                    <Grid Margin="26,22,26,22">
+
+                        <!-- ===== INICIO ===== -->
+                        <StackPanel x:Name="pageInicio">
+                            <Border Margin="0,0,0,16">
+                                <Grid>
+                                    <Path Stretch="Fill" Data="M 18,0 L 2000,0 L 2000,300 L 0,300 L 0,18 Z">
+                                        <Path.Fill>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#1B2230" Offset="0"/>
+                                                <GradientStop Color="#12161E" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Path.Fill>
+                                    </Path>
+                                    <Rectangle Width="3" HorizontalAlignment="Left" Margin="0,18,0,0" Fill="{StaticResource ValRed}"/>
+                                    <StackPanel Margin="24,22,24,22">
+                                        <TextBlock Text="ESTADO DEL EQUIPO" FontSize="16" FontWeight="Bold" Foreground="White"/>
+                                        <TextBlock Text="Libera recursos para maximizar el rendimiento en partida." FontSize="11.5" Foreground="{StaticResource TextDim}" Margin="0,4,0,16"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                            <StackPanel Margin="0,0,44,0">
+                                                <TextBlock x:Name="lblRam" Text="--%" FontSize="28" FontWeight="Bold" Foreground="{StaticResource ValRed}"/>
+                                                <TextBlock Text="USO DE MEMORIA" FontSize="10" Foreground="{StaticResource TextDim}"/>
+                                            </StackPanel>
+                                            <StackPanel>
+                                                <TextBlock x:Name="lblTemp" Text="-- MB" FontSize="28" FontWeight="Bold" Foreground="{StaticResource ValMint}"/>
+                                                <TextBlock Text="ARCHIVOS TEMPORALES" FontSize="10" Foreground="{StaticResource TextDim}"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <Button Content="OPTIMIZAR TODO" Click="OptimizarTodo_Click" Style="{StaticResource ValRedButton}" Height="46"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Column="0" Margin="0,0,8,0">
+                                    <Path Stretch="Fill" Fill="{StaticResource BgCard}" Data="M 14,0 L 2000,0 L 2000,300 L 0,300 L 0,14 Z"/>
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="BACKUP" Style="{StaticResource CardTitle}"/>
+                                        <TextBlock Text="Copia de seguridad antes de aplicar cambios." FontSize="11" Foreground="{StaticResource TextDim}" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                                        <Button Content="CREAR BACKUP" Click="Backup_Click" Style="{StaticResource ValRedButton}"/>
+                                    </StackPanel>
+                                </Grid>
+                                <Grid Grid.Column="1" Margin="8,0,0,0">
+                                    <Path Stretch="Fill" Fill="{StaticResource BgCard}" Data="M 14,0 L 2000,0 L 2000,300 L 0,300 L 0,14 Z"/>
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="LIMPIEZA RAPIDA" Style="{StaticResource CardTitle}"/>
+                                        <TextBlock Text="Elimina archivos temporales del sistema." FontSize="11" Foreground="{StaticResource TextDim}" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                                        <Button Content="LIMPIAR TEMPORALES" Click="Temp_Click" Style="{StaticResource ValButton}" HorizontalContentAlignment="Center"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- ===== GRAFICOS ===== -->
+                        <StackPanel x:Name="pageGraficos" Visibility="Collapsed">
+                            <TextBlock Text="GRAFICOS" FontSize="19" FontWeight="Bold" Foreground="White" Margin="0,0,0,16"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Column="0" Margin="0,0,8,0">
+                                    <Path Stretch="Fill" Fill="{StaticResource BgCard}" Data="M 14,0 L 2000,0 L 2000,300 L 0,300 L 0,14 Z"/>
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="GPU Y RENDIMIENTO" Style="{StaticResource CardTitle}" Margin="0,0,0,8"/>
+                                        <Button Content="Activar aceleracion de GPU" Click="AcelGpu_Click" Style="{StaticResource ValButton}"/>
+                                        <Button Content="Activar HAGS · reiniciar" Click="Hags_Click" Style="{StaticResource ValButton}"/>
+                                        <Button Content="Prioridad grafica a Valorant" Click="PrioGpu_Click" Style="{StaticResource ValButton}"/>
+                                        <Button Content="Optim. pantalla completa OFF" Click="PantallaCompleta_Click" Style="{StaticResource ValButton}"/>
+                                    </StackPanel>
+                                </Grid>
+                                <Grid Grid.Column="1" Margin="8,0,0,0">
+                                    <Path Stretch="Fill" Fill="{StaticResource BgCard}" Data="M 14,0 L 2000,0 L 2000,300 L 0,300 L 0,14 Z"/>
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="VISUAL DE WINDOWS" Style="{StaticResource CardTitle}" Margin="0,0,0,8"/>
+                                        <Button Content="Desactivar aceleracion del mouse" Click="Mouse_Click" Style="{StaticResource ValButton}"/>
+                                        <Button Content="Desactivar transparencia" Click="Transp_Click" Style="{StaticResource ValButton}"/>
+                                        <Button Content="Efectos visuales: rendimiento" Click="Efectos_Click" Style="{StaticResource ValButton}"/>
+                                        <Button Content="Bajar graficos del PC" Click="BajarGraf_Click" Style="{StaticResource ValButton}"/>
+                                        <Button Content="Escalado optimo (100%)" Click="Escalado_Click" Style="{StaticResource ValButton}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- ===== SISTEMA ===== -->
+                        <StackPanel x:Name="pageSistema" Visibility="Collapsed">
+                            <TextBlock Text="SISTEMA" FontSize="19" FontWeight="Bold" Foreground="White" Margin="0,0,0,16"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Column="0" Margin="0,0,8,0">
+                                    <Path Stretch="Fill" Fill="{StaticResource BgCard}" Data="M 14,0 L 2000,0 L 2000,300 L 0,300 L 0,14 Z"/>
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="ENERGIA Y ARRANQUE" Style="{StaticResource CardTitle}" Margin="0,0,0,8"/>
+                                        <Button Content="Plan de energia maximo" Click="Energia_Click" Style="{StaticResource ValButton}"/>
+                                        <Button Content="Desactivar HPET · reiniciar" Click="Hpet_Click" Style="{StaticResource ValButton}"/>
+                                        <Button Content="Ajustar paginacion 8 GB" Click="Pagina_Click" Style="{StaticResource ValButton}"/>
+                                        <Button Content="Desactivar apps en 2do plano" Click="Apps2do_Click" Style="{StaticResource ValButton}"/>
+                                        <Button Content="Cerrar overlays" Click="Overlays_Click" Style="{StaticResource ValButton}"/>
+                                    </StackPanel>
+                                </Grid>
+                                <Grid Grid.Column="1" Margin="8,0,0,0">
+                                    <Path Stretch="Fill" Fill="{StaticResource BgCard}" Data="M 14,0 L 2000,0 L 2000,300 L 0,300 L 0,14 Z"/>
+                                    <StackPanel Margin="18">
+                                        <TextBlock Text="PROGRAMAS DE INICIO" Style="{StaticResource CardTitle}" Margin="0,0,0,8"/>
+                                        <Button Content="Ver programas de inicio" Click="VerInicio_Click" Style="{StaticResource ValButton}"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                            <TextBox x:Name="NombreInicio" Width="140" Margin="0,0,6,0"/>
+                                            <Button Content="QUITAR" Click="QuitarInicio_Click" Style="{StaticResource MiniButton}" Width="90"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- ===== MONITOREO ===== -->
+                        <StackPanel x:Name="pageMonitoreo" Visibility="Collapsed">
+                            <TextBlock Text="MONITOREO" FontSize="19" FontWeight="Bold" Foreground="White" Margin="0,0,0,16"/>
+                            <Grid Margin="0,0,0,14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Column="0" Margin="0,0,5,0">
+                                    <Path Stretch="Fill" Fill="{StaticResource BgCard}" Data="M 12,0 L 2000,0 L 2000,300 L 0,300 L 0,12 Z"/>
+                                    <StackPanel Margin="16">
+                                        <TextBlock Text="TEMPERATURAS" Style="{StaticResource CardTitle}" Margin="0,0,0,8"/>
+                                        <Button Content="VER" Click="VerTemp_Click" Style="{StaticResource MiniButton}"/>
+                                    </StackPanel>
+                                </Grid>
+                                <Grid Grid.Column="1" Margin="5,0,5,0">
+                                    <Path Stretch="Fill" Fill="{StaticResource BgCard}" Data="M 12,0 L 2000,0 L 2000,300 L 0,300 L 0,12 Z"/>
+                                    <StackPanel Margin="16">
+                                        <TextBlock Text="DRIVER GPU" Style="{StaticResource CardTitle}" Margin="0,0,0,8"/>
+                                        <Button Content="VER" Click="VerDriver_Click" Style="{StaticResource MiniButton}"/>
+                                    </StackPanel>
+                                </Grid>
+                                <Grid Grid.Column="2" Margin="5,0,0,0">
+                                    <Path Stretch="Fill" Fill="{StaticResource BgCard}" Data="M 12,0 L 2000,0 L 2000,300 L 0,300 L 0,12 Z"/>
+                                    <StackPanel Margin="16">
+                                        <TextBlock Text="CUELLO BOTELLA" Style="{StaticResource CardTitle}" Margin="0,0,0,8"/>
+                                        <Button Content="DETECTAR" Click="VerCuello_Click" Style="{StaticResource MiniButton}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                            <Grid>
+                                <Path Stretch="Fill" Fill="#070A0E" Data="M 12,0 L 2000,0 L 2000,400 L 0,400 L 0,12 Z"/>
+                                <Rectangle Width="3" HorizontalAlignment="Left" Margin="0,12,0,0" Fill="{StaticResource ValMint}"/>
+                                <TextBox x:Name="Salida" Background="Transparent" BorderThickness="0" Foreground="#7FE7C8"
+                                     TextWrapping="Wrap" IsReadOnly="True" MinHeight="200" VerticalScrollBarVisibility="Auto"
+                                     FontFamily="Consolas" FontSize="12" Margin="14,12,8,12" Text="// Los resultados apareceran aqui."/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- ===== PERFILES ===== -->
+                        <StackPanel x:Name="pagePerfiles" Visibility="Collapsed">
+                            <TextBlock Text="PERFILES" FontSize="19" FontWeight="Bold" Foreground="White" Margin="0,0,0,16"/>
+                            <Grid>
+                                <Path Stretch="Fill" Fill="{StaticResource BgCard}" Data="M 16,0 L 2000,0 L 2000,400 L 0,400 L 0,16 Z"/>
+                                <StackPanel Margin="20">
+                                    <TextBlock Text="GUARDAR Y CARGAR CONFIGURACIONES" Style="{StaticResource CardTitle}" Margin="0,0,0,12"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                                        <TextBox x:Name="NombrePerfil" Width="200" Text="MiPerfil" Margin="0,0,8,0"/>
+                                        <Button Content="GUARDAR" Click="GuardarPerfil_Click" Style="{StaticResource MiniButton}" Width="100" Margin="0,0,8,0"/>
+                                        <Button Content="CARGAR" Click="CargarPerfil_Click" Style="{StaticResource MiniButton}" Width="100"/>
+                                    </StackPanel>
+                                    <WrapPanel Margin="0,0,0,14">
+                                        <CheckBox x:Name="cbMouse" Content="Mouse" Margin="0,0,16,6"/>
+                                        <CheckBox x:Name="cbGameBar" Content="Game Bar" Margin="0,0,16,6"/>
+                                        <CheckBox x:Name="cbTransp" Content="Transparencia" Margin="0,0,16,6"/>
+                                        <CheckBox x:Name="cbEnergia" Content="Energia" Margin="0,0,16,6"/>
+                                        <CheckBox x:Name="cbTemp" Content="Temporales" Margin="0,0,16,6"/>
+                                    </WrapPanel>
+                                    <Button Content="APLICAR PERFIL CARGADO" Click="AplicarPerfil_Click" Style="{StaticResource ValRedButton}"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                    </Grid>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
