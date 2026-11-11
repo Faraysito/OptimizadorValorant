@@ -11,13 +11,13 @@ namespace OptimizadorValorant
             ActualizarEstado();
         }
 
-        // ===== Barra de titulo =====
+        // barra de título
         void Min_Click(object s, RoutedEventArgs e) => WindowState = WindowState.Minimized;
         void Max_Click(object s, RoutedEventArgs e) =>
             WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
         void Close_Click(object s, RoutedEventArgs e) => Close();
 
-        // ===== Navegacion =====
+        // navegación
         void Nav_Checked(object sender, RoutedEventArgs e)
         {
             if (pageInicio == null) return;

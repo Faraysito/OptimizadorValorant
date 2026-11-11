@@ -11,7 +11,7 @@
 
     <Window.Resources>
 
-        <!-- ===== Paleta Valorant ===== -->
+        <!-- colores -->
         <Color x:Key="ValRedC">#FF4655</Color>
         <SolidColorBrush x:Key="ValRed" Color="#FF4655"/>
         <SolidColorBrush x:Key="ValRedDark" Color="#BD3944"/>
@@ -31,7 +31,7 @@
             <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
         </Style>
 
-        <!-- ===== Botón táctico: esquina cortada + sweep al hover + flash al click ===== -->
+        <!-- botón con esquina cortada, barrido al hover y flash al click -->
         <Style x:Key="ValButton" TargetType="Button">
             <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
             <Setter Property="FontFamily" Value="{StaticResource Tac}"/>
@@ -44,12 +44,12 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Grid>
-                            <!-- Forma con esquina inferior-izquierda cortada (chaflan HUD) -->
+                            <!-- esquina inferior izquierda cortada -->
                             <Path x:Name="bg" Stretch="Fill" Fill="{StaticResource BgCard}"
                                   Data="M 8,0 L 1000,0 L 1000,100 L 0,100 L 0,8 Z"/>
-                            <!-- Barra lateral de acento (como icono de habilidad) -->
+                            <!-- barra de acento -->
                             <Rectangle x:Name="accent" Width="3" HorizontalAlignment="Left" Fill="{StaticResource ValRed}" Opacity="0"/>
-                            <!-- Sweep: franja que cruza al pasar el mouse -->
+                            <!-- franja que cruza al pasar el mouse -->
                             <Border x:Name="sweep" Background="#22FF4655" Width="60" HorizontalAlignment="Left"
                                     RenderTransformOrigin="0,0" Opacity="0">
                                 <Border.RenderTransform>
@@ -267,7 +267,7 @@
         </Style>
     </Window.Resources>
 
-    <!-- Borde rojo fino alrededor de toda la ventana (estilo HUD) -->
+    <!-- borde rojo de la ventana -->
     <Border BorderBrush="{StaticResource ValRed}" BorderThickness="1" Background="{StaticResource BgDeep}">
         <Grid>
             <Grid.RowDefinitions>
@@ -275,7 +275,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- ====== BARRA DE TITULO ====== -->
+            <!-- barra de título -->
             <Grid Grid.Row="0" Background="#0A0D12">
                 <Rectangle Height="2" VerticalAlignment="Bottom" Fill="{StaticResource ValRed}" Opacity="0.5"/>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
@@ -291,14 +291,14 @@
                 </StackPanel>
             </Grid>
 
-            <!-- ====== CUERPO ====== -->
+            <!-- cuerpo -->
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="210"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- SIDEBAR -->
+                <!-- sidebar -->
                 <Border Grid.Column="0" Background="#0A0D12">
                     <Grid>
                         <Rectangle Width="1" HorizontalAlignment="Right" Fill="{StaticResource LineSoft}"/>
@@ -314,11 +314,11 @@
                     </Grid>
                 </Border>
 
-                <!-- CONTENIDO -->
+                <!-- contenido -->
                 <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
                     <Grid Margin="26,22,26,22">
 
-                        <!-- ===== INICIO ===== -->
+                        <!-- inicio -->
                         <StackPanel x:Name="pageInicio">
                             <Border Margin="0,0,0,16">
                                 <Grid>
@@ -372,7 +372,7 @@
                             </Grid>
                         </StackPanel>
 
-                        <!-- ===== GRAFICOS ===== -->
+                        <!-- gráficos -->
                         <StackPanel x:Name="pageGraficos" Visibility="Collapsed">
                             <TextBlock Text="GRAFICOS" FontSize="19" FontWeight="Bold" Foreground="White" Margin="0,0,0,16"/>
                             <Grid>
@@ -404,7 +404,7 @@
                             </Grid>
                         </StackPanel>
 
-                        <!-- ===== SISTEMA ===== -->
+                        <!-- sistema -->
                         <StackPanel x:Name="pageSistema" Visibility="Collapsed">
                             <TextBlock Text="SISTEMA" FontSize="19" FontWeight="Bold" Foreground="White" Margin="0,0,0,16"/>
                             <Grid>
@@ -437,7 +437,7 @@
                             </Grid>
                         </StackPanel>
 
-                        <!-- ===== MONITOREO ===== -->
+                        <!-- monitoreo -->
                         <StackPanel x:Name="pageMonitoreo" Visibility="Collapsed">
                             <TextBlock Text="MONITOREO" FontSize="19" FontWeight="Bold" Foreground="White" Margin="0,0,0,16"/>
                             <Grid Margin="0,0,0,14">
@@ -477,7 +477,7 @@
                             </Grid>
                         </StackPanel>
 
-                        <!-- ===== PERFILES ===== -->
+                        <!-- perfiles -->
                         <StackPanel x:Name="pagePerfiles" Visibility="Collapsed">
                             <TextBlock Text="PERFILES" FontSize="19" FontWeight="Bold" Foreground="White" Margin="0,0,0,16"/>
                             <Grid>

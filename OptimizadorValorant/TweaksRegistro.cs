@@ -50,14 +50,13 @@ namespace OptimizadorValorant
             k?.SetValue(r, "~ DISABLEDXMAXIMIZEDWINDOWEDMODE");
         }
 
-        // --- Activar aceleracion de GPU (hardware acceleration global) ---
         public static void ActivarAceleracionGPU()
         {
             using var k = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Avalon.Graphics");
             k?.SetValue("DisableHWAcceleration", 0, RegistryValueKind.DWord);
         }
 
-        // --- Bajar graficos del PC (sin fondo, sin animaciones de menu) ---
+        // sin arrastre de ventanas ni animaciones de menú
         public static void BajarGraficos()
         {
             using var k = Registry.CurrentUser.CreateSubKey(@"Control Panel\Desktop");
@@ -67,7 +66,6 @@ namespace OptimizadorValorant
             w?.SetValue("MinAnimate", "0");
         }
 
-        // --- Desactivar apps en segundo plano ---
         public static void DesactivarAppsSegundoPlano()
         {
             using var k = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications");
@@ -76,7 +74,7 @@ namespace OptimizadorValorant
             k2?.SetValue("BackgroundAppGlobalToggle", 0, RegistryValueKind.DWord);
         }
 
-        // --- Escalado de pantalla a 100% (recomendado para gaming) ---
+        // escalado al 100%
         public static void EscaladoOptimo()
         {
             using var k = Registry.CurrentUser.CreateSubKey(@"Control Panel\Desktop");

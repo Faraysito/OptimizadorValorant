@@ -6,7 +6,7 @@ namespace OptimizadorValorant
 {
     public static class Backup
     {
-        // Carpeta donde se guardan los backups (en tus Documentos)
+        // los backups quedan en Documentos
         static string CarpetaBackup = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             "OptimizadorValorant_Backups");
@@ -18,16 +18,16 @@ namespace OptimizadorValorant
             string carpeta = Path.Combine(CarpetaBackup, sello);
             Directory.CreateDirectory(carpeta);
 
-            // 1. Backup de las claves de registro que vamos a tocar
+            // claves de registro que se tocan
             ExportarRegistro(@"HKEY_CURRENT_USER\Control Panel\Mouse",
                              Path.Combine(carpeta, "mouse.reg"));
             ExportarRegistro(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
                              Path.Combine(carpeta, "explorer.reg"));
 
-            // 2. Backup del plan de energía actual
+            // plan de energía actual
             EjecutarCmd("cmd.exe", $"/c powercfg /getactivescheme > \"{Path.Combine(carpeta, "plan_energia.txt")}\"");
 
-            // 3. Backup de la lista de servicios y su estado
+            // servicios y su estado
             EjecutarCmd("cmd.exe", $"/c sc query state= all > \"{Path.Combine(carpeta, "servicios.txt")}\"");
 
             System.Windows.MessageBox.Show("Backup creado en:\n" + carpeta, "Backup");

@@ -4,7 +4,7 @@ namespace OptimizadorValorant
 {
     public static class TweaksProcesos
     {
-        // --- Cerrar overlays (SEGURO: se hace ANTES de abrir Valorant) ---
+        // llamarlo antes de abrir valorant
         public static void CerrarOverlays()
         {
             string[] overlays = { "Discord", "Steam", "Overwolf", "GameOverlayUI", "EpicGamesLauncher" };

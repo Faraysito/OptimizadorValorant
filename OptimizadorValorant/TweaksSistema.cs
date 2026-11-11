@@ -49,21 +49,19 @@ namespace OptimizadorValorant
             catch { }
         }
 
-        // --- Ajustar archivo de paginacion (metodo moderno via PowerShell/WMI) ---
-        // Tamano fijo en MB. Cambiá los valores si querés otro tamano.
+        // tamaño fijo en MB, por WMI
         public static void AjustarPaginacion(int mb = 8192)
         {
             PowerShell("$cs = Get-WmiObject Win32_ComputerSystem -EnableAllPrivileges; $cs.AutomaticManagedPagefile = $false; $cs.Put() | Out-Null");
             PowerShell($"$pf = Get-WmiObject Win32_PageFileSetting; if($pf){{ $pf.InitialSize = {mb}; $pf.MaximumSize = {mb}; $pf.Put() | Out-Null }} else {{ Set-WmiInstance -Class Win32_PageFileSetting -Arguments @{{Name='C:\\pagefile.sys'; InitialSize={mb}; MaximumSize={mb}}} | Out-Null }}");
         }
 
-        // --- Listar programas de inicio (lectura) ---
         public static string ListarProgramasInicio()
         {
             return PowerShell("Get-CimInstance Win32_StartupCommand | Select-Object Name, Command | Format-Table -AutoSize | Out-String");
         }
 
-        // --- Desactivar un programa de inicio por nombre (en el registro Run del usuario) ---
+        // lo borra de la clave Run del usuario
         public static void DesactivarProgramaInicio(string nombre)
         {
             var p = new ProcessStartInfo
